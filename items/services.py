@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from sqlalchemy import select
+from sqlalchemy import select, desc
 
 from db import SQLAlchemySessionContextManager
 from items import items_pb2, items_pb2_grpc
@@ -20,17 +20,17 @@ class SimilaritySearchService(items_pb2_grpc.SimilaritySearchServiceServicer):
             item_exists = session.execute(item_exists_query).one_or_none()
             if item_exists:
                 context.abort(StatusCode.ALREADY_EXISTS, "Item with given id already exists")
-
-            item = Item(id=request.id, description=request.description)
-            session.add(item)
-            session.commit()
-        return items_pb2.AddItemResponse(message="Item successfully created")
+            else:
+                item = Item(id=request.id, description=request.description)
+                session.add(item)
+                session.commit()
+            return items_pb2.AddItemResponse(message="Item successfully created")
 
     def SearchItems(self, request, context):
         search_results = []
         with SQLAlchemySessionContextManager() as session:
             items = session.execute(select(Item)).scalars().all()
-            items_dicts = [item.__dict__ for item in items]
+            items_dicts = [{"id": item.id, "description": item.description} for item in items]
             results = compute_jaccard_similarity(request.query, items_dicts)
             search_id = str(uuid4())
 
@@ -46,9 +46,19 @@ class SimilaritySearchService(items_pb2_grpc.SimilaritySearchServiceServicer):
 
         return items_pb2.SearchItemsResponse(search_id=search_id)
 
+    def GetSearchResults(self, request, context):
+        with SQLAlchemySessionContextManager() as session:
+            items = session.execute(
+                select(Item)
+                .join(SearchResult)
+                .filter(SearchResult.search_id == request.search_id)
+                .order_by(desc(SearchResult.similarity))
+            ).scalars().all()
+            items_dicts = [{"id": item.id, "description": item.description} for item in items]
+        return items_pb2.GetSearchResultsResponse(results=items_dicts)
+
 
 def serve():
-    print("Starting server")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     items_pb2_grpc.add_SimilaritySearchServiceServicer_to_server(
         SimilaritySearchService(), server
@@ -56,7 +66,6 @@ def serve():
     server.add_insecure_port("[::]:50051")
     server.start()
     server.wait_for_termination()
-    print("Finished")
 
 
 if __name__ == "__main__":
