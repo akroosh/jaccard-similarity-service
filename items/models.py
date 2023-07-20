@@ -1,7 +1,7 @@
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
-from sqlalchemy import Column, Float, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, relationship
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -17,7 +17,7 @@ class Item(Base):
     search_results = relationship("SearchResult", back_populates="item")
 
     def __repr__(self):
-        return f"<Item (id={self.id}, description={self.description}) >"
+        return f"<Item (id={self.id}, description={self.description})>"
 
 
 class SearchResult(Base):
@@ -25,7 +25,7 @@ class SearchResult(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     search_id: Mapped[str] = mapped_column(nullable=False)
-    similarity = Column(Float, nullable=False)
+    similarity: Mapped[float] = mapped_column(nullable=False)
 
     # relationships
     item_id: Mapped[str] = mapped_column(ForeignKey("item.id"), nullable=False)

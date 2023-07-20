@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  similarity_service:
+    build: .
+    ports:
+      - "50051:50051"
+    environment:
+      - TARGET=${TARGET}
+    depends_on:
+      - pgdatabase
+
+  pgdatabase:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "6543:5432"
