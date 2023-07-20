@@ -1,8 +1,7 @@
-from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from settings import DEBUG, POSTGRES_URL
-
 
 engine = create_engine(POSTGRES_URL, echo=DEBUG, pool_pre_ping=True)
 SessionLocal = sessionmaker(class_=Session, autocommit=False, autoflush=False, bind=engine)

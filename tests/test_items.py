@@ -1,21 +1,24 @@
 import unittest
 from unittest.mock import MagicMock
 from grpc import StatusCode
-from items import items_pb2
+from protobufs import items_pb2
 from items.services import SimilaritySearchService
 
 
 class SimilaritySearchServiceTest(unittest.TestCase):
     def setUp(self):
+        """Set up the test environment by initializing SimilaritySearchService."""
         self.service = SimilaritySearchService()
 
     def test_AddItem_Success(self):
+        """Test adding an item with success."""
         context = MagicMock()
         request = items_pb2.AddItemRequest(id="200", description="Test item")
         response = self.service.AddItem(request, context)
         self.assertEqual(response.message, "Item successfully created")
 
     def test_AddItem_AlreadyExists(self):
+        """Test adding an item that already exists."""
         context = MagicMock()
         request = items_pb2.AddItemRequest(id="300", description="Test item")
         self.service.session = MagicMock()
@@ -30,6 +33,7 @@ class SimilaritySearchServiceTest(unittest.TestCase):
         context.abort.assert_called_with(StatusCode.ALREADY_EXISTS, "Item with given id already exists")
 
     def test_SearchItems_Success(self):
+        """Test searching for items with success."""
         context = MagicMock()
 
         # add items
@@ -45,6 +49,7 @@ class SimilaritySearchServiceTest(unittest.TestCase):
         self.assertIsNotNone(response.search_id)
 
     def test_GetSearchResults_Success(self):
+        """Test getting search results with success."""
         context = MagicMock()
 
         # add items
