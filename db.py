@@ -9,13 +9,13 @@ SessionLocal = sessionmaker(class_=Session, autocommit=False, autoflush=False, b
 
 class SQLAlchemySessionContextManager:
     def __init__(self):
-        """Set up a database session for use in the rest of the functions."""
+        """Sets up a database session for use in the rest of the functions."""
         self.session = SessionLocal()
 
     def __enter__(self):
-        """Return the object that will be assigned to the variable in as clause of with statement."""
+        """Returns the object that will be assigned to the variable in as clause of with statement."""
         return self.session
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """Close the session."""
+        """Closes the session."""
         self.session.close()

@@ -7,6 +7,7 @@ from protobufs.items_pb2_grpc import add_SimilaritySearchServiceServicer_to_serv
 
 
 def serve():
+    """Runs SimilaritySearchService till it's terminated."""
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
     add_SimilaritySearchServiceServicer_to_server(SimilaritySearchService(), server)
     server.add_insecure_port("[::]:50051")

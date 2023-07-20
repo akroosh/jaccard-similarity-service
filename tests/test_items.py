@@ -69,7 +69,3 @@ class SimilaritySearchServiceTest(unittest.TestCase):
 
         # assert that the response results are not empty
         self.assertTrue(response.results)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -11,6 +11,7 @@ from utils.jaccard_similarity import compute_similarity_for_all_items
 
 class SimilaritySearchService(items_pb2_grpc.SimilaritySearchServiceServicer):
     def AddItem(self, request, context):
+        """Creates item in DB."""
         with SQLAlchemySessionContextManager() as session:
             item_exists_query = select(1).filter(Item.id == request.id)
             item_exists = session.execute(item_exists_query).one_or_none()
@@ -23,6 +24,7 @@ class SimilaritySearchService(items_pb2_grpc.SimilaritySearchServiceServicer):
             return items_pb2.AddItemResponse(message="Item successfully created")
 
     def SearchItems(self, request, context):
+        """Finds similarity for all items with query and saves the results."""
         search_results = []
         with SQLAlchemySessionContextManager() as session:
             items = session.execute(select(Item)).scalars().all()
@@ -42,6 +44,7 @@ class SimilaritySearchService(items_pb2_grpc.SimilaritySearchServiceServicer):
         return items_pb2.SearchItemsResponse(search_id=search_id)
 
     def GetSearchResults(self, request, context):
+        """Returns a list of search results by their id."""
         with SQLAlchemySessionContextManager() as session:
             items = (
                 session.execute(
